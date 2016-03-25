@@ -4,6 +4,7 @@ var async = require('async')
 
 function CobudgetClient (params) {
   this.authHeaders = {}
+  this.params = params
   this.baseUri = 'https://cobudget-beta-api.herokuapp.com/api/v1'
 }
 
@@ -11,7 +12,7 @@ CobudgetClient.prototype.init = function (callback) {
   var self = this
   request.post({
     uri: self.baseUri + '/auth/sign_in',
-    form: params
+    form: self.params
   }, function (err, response, body) {
     var headers = response.toJSON().headers
     self.authHeaders = pick(headers, ['access-token', 'uid', 'client', 'token-type'])
