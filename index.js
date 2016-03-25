@@ -29,7 +29,7 @@ CobudgetClient.prototype.getItAll = function (callback) {
     allocations: async.apply(self.getAllocationsForGroup.bind(self), { id: 41 }),
     users: async.apply(self.getUsersForGroup.bind(self), { id: 41 })
   }, function (err, results) {
-    console.log('results: ', JSON.stringify(results))
+    callback()
   });
 }
 
