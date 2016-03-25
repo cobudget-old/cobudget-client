@@ -15,11 +15,17 @@ var schema = {
 prompt.get(schema, function (err, result) {
   params = result
   var client = new CobudgetClient(params)
+  client.init(function () {
+    client.getItAll()
+  })
 })
 
 function CobudgetClient (params) {
   this.authHeaders = {}
   this.baseUri = 'https://cobudget-beta-api.herokuapp.com/api/v1'
+}
+
+CobudgetClient.prototype.init = function (callback) {
   var self = this
   request.post({
     uri: self.baseUri + '/auth/sign_in',
@@ -27,30 +33,35 @@ function CobudgetClient (params) {
   }, function (err, response, body) {
     var headers = response.toJSON().headers
     self.authHeaders = pick(headers, ['access-token', 'uid', 'client', 'token-type'])
-    async.parallel({
-      me: self.getMe.bind(self),
-      group: async.apply(self.getGroup.bind(self), 41),
-      buckets: function (callback) {
-        self.getBucketsForGroup({ id: 41 }, function (err, buckets) {
-          if (err) return callback(err);
-          async.map(buckets, function (bucket, cb) {
-            async.parallel({
-              comments: async.apply(self.getCommentsForBucket.bind(self), bucket),
-              contributions: async.apply(self.getContributionsForBucket.bind(self), bucket)
-            }, function (err, results) {
-              bucket.contributions = results.contributions
-              bucket.comments = results.comments
-              cb(null, bucket)
-            })
-          }, callback)
-        });
-      },
-      allocations: async.apply(self.getAllocationsForGroup.bind(self), { id: 41 }),
-      users: async.apply(self.getUsersForGroup.bind(self), { id: 41 })
-    }, function (err, results) {
-      console.log('results: ', JSON.stringify(results))
-    });
+    callback()
   })
+}
+
+CobudgetClient.prototype.getItAll = function (callback) {
+  var self = this
+  async.parallel({
+    me: self.getMe.bind(self),
+    group: async.apply(self.getGroup.bind(self), 41),
+    buckets: function (callback) {
+      self.getBucketsForGroup({ id: 41 }, function (err, buckets) {
+        if (err) return callback(err);
+        async.map(buckets, function (bucket, cb) {
+          async.parallel({
+            comments: async.apply(self.getCommentsForBucket.bind(self), bucket),
+            contributions: async.apply(self.getContributionsForBucket.bind(self), bucket)
+          }, function (err, results) {
+            bucket.contributions = results.contributions
+            bucket.comments = results.comments
+            cb(null, bucket)
+          })
+        }, callback)
+      });
+    },
+    allocations: async.apply(self.getAllocationsForGroup.bind(self), { id: 41 }),
+    users: async.apply(self.getUsersForGroup.bind(self), { id: 41 })
+  }, function (err, results) {
+    console.log('results: ', JSON.stringify(results))
+  });
 }
 
 CobudgetClient.prototype.getMe = function (callback) {
