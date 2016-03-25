@@ -42,21 +42,7 @@ CobudgetClient.prototype.getItAll = function (callback) {
   async.parallel({
     me: self.getMe.bind(self),
     group: async.apply(self.getGroup.bind(self), 41),
-    buckets: function (callback) {
-      self.getBucketsForGroup({ id: 41 }, function (err, buckets) {
-        if (err) return callback(err);
-        async.map(buckets, function (bucket, cb) {
-          async.parallel({
-            comments: async.apply(self.getCommentsForBucket.bind(self), bucket),
-            contributions: async.apply(self.getContributionsForBucket.bind(self), bucket)
-          }, function (err, results) {
-            bucket.contributions = results.contributions
-            bucket.comments = results.comments
-            cb(null, bucket)
-          })
-        }, callback)
-      });
-    },
+    buckets: async.apply(self.getBucketsForGroup.bind(self), {id: 41}),
     allocations: async.apply(self.getAllocationsForGroup.bind(self), { id: 41 }),
     users: async.apply(self.getUsersForGroup.bind(self), { id: 41 })
   }, function (err, results) {
@@ -93,7 +79,18 @@ CobudgetClient.prototype.getBucketsForGroup = function (group, callback) {
     headers: self.authHeaders
   }, function (err, response, body) {
     if (err) return callback(err);
-    callback(null, JSON.parse(body).buckets);
+    var buckets = JSON.parse(body).buckets
+
+    async.map(buckets, function (bucket, cb) {
+      async.parallel({
+        comments: async.apply(self.getCommentsForBucket.bind(self), bucket),
+        contributions: async.apply(self.getContributionsForBucket.bind(self), bucket)
+      }, function (err, results) {
+        bucket.contributions = results.contributions
+        bucket.comments = results.comments
+        cb(null, bucket)
+      })
+    }, callback)
   });
 }
 
