@@ -1,6 +1,6 @@
 {
   "name": "cobudget-client",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "node.js interface for cobudget beta's api",
   "main": "index.js",
   "scripts": {

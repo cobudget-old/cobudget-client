@@ -28,9 +28,7 @@ CobudgetClient.prototype.getItAll = function (callback) {
     buckets: async.apply(self.getBucketsForGroup.bind(self), {id: 41}),
     allocations: async.apply(self.getAllocationsForGroup.bind(self), { id: 41 }),
     users: async.apply(self.getUsersForGroup.bind(self), { id: 41 })
-  }, function (err, results) {
-    callback()
-  });
+  }, callback);
 }
 
 CobudgetClient.prototype.getMe = function (callback) {
