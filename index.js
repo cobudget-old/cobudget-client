@@ -17,7 +17,6 @@ prompt.get(schema, function (err, result) {
   var client = new CobudgetClient(params)
 })
 
-
 function CobudgetClient (params) {
   this.authHeaders = {}
   this.baseUri = 'https://cobudget-beta-api.herokuapp.com/api/v1'
@@ -46,7 +45,8 @@ function CobudgetClient (params) {
           }, callback)
         });
       },
-      allocations: async.apply(self.getAllocationsForGroup.bind(self), { id: 41 })
+      allocations: async.apply(self.getAllocationsForGroup.bind(self), { id: 41 }),
+      users: async.apply(self.getUsersForGroup.bind(self), { id: 41 })
     }, function (err, results) {
       console.log('results: ', JSON.stringify(results))
     });
@@ -116,5 +116,16 @@ CobudgetClient.prototype.getCommentsForBucket = function (bucket, callback) {
   }, function (err, response, body) {
     if (err) return callback(err);
     callback(null, JSON.parse(body).comments);
+  });
+}
+
+CobudgetClient.prototype.getUsersForGroup = function (group, callback) {
+  var self = this
+  request.get({
+    uri: self.baseUri + '/memberships?group_id=' + group.id,
+    headers: self.authHeaders
+  }, function (err, response, body) {
+    if (err) return callback(err);
+    callback(null, JSON.parse(body).users);
   });
 }
