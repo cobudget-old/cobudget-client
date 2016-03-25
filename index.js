@@ -1,24 +1,6 @@
 var request = require('request')
-var prompt = require('prompt')
 var pick = require('lodash.pick')
 var async = require('async')
-
-var params;
-
-var schema = {
-  properties: {
-    email: { required: true, description: 'whats ur email ?' },
-    password: { hidden: true, replace: '$', description: 'whats ur password ?' }
-  }
-}
-
-prompt.get(schema, function (err, result) {
-  params = result
-  var client = new CobudgetClient(params)
-  client.init(function () {
-    client.getItAll()
-  })
-})
 
 function CobudgetClient (params) {
   this.authHeaders = {}
@@ -139,3 +121,5 @@ CobudgetClient.prototype.getUsersForGroup = function (group, callback) {
     callback(null, JSON.parse(body).users);
   });
 }
+
+module.exports = CobudgetClient
