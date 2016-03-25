@@ -80,18 +80,20 @@ CobudgetClient.prototype.getBucketsForGroup = function (group, callback) {
   }, function (err, response, body) {
     if (err) return callback(err);
     var buckets = JSON.parse(body).buckets
-
-    async.map(buckets, function (bucket, cb) {
-      async.parallel({
-        comments: async.apply(self.getCommentsForBucket.bind(self), bucket),
-        contributions: async.apply(self.getContributionsForBucket.bind(self), bucket)
-      }, function (err, results) {
-        bucket.contributions = results.contributions
-        bucket.comments = results.comments
-        cb(null, bucket)
-      })
-    }, callback)
+    async.map(buckets, self.getActivityForBucket.bind(self), callback)
   });
+}
+
+CobudgetClient.prototype.getActivityForBucket = function (bucket, callback) {
+  var self = this
+  async.parallel({
+    comments: async.apply(self.getCommentsForBucket.bind(self), bucket),
+    contributions: async.apply(self.getContributionsForBucket.bind(self), bucket)
+  }, function (err, results) {
+    bucket.contributions = results.contributions
+    bucket.comments = results.comments
+    callback(null, bucket)
+  })
 }
 
 CobudgetClient.prototype.getAllocationsForGroup = function (group, callback) {
