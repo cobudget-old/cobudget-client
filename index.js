@@ -20,14 +20,14 @@ CobudgetClient.prototype.init = function (callback) {
   })
 }
 
-CobudgetClient.prototype.getItAll = function (callback) {
+CobudgetClient.prototype.getItAll = function (groupId, callback) {
   var self = this
   async.parallel({
     me: self.getMe.bind(self),
-    group: async.apply(self.getGroup.bind(self), 41),
-    buckets: async.apply(self.getBucketsForGroup.bind(self), {id: 41}),
-    allocations: async.apply(self.getAllocationsForGroup.bind(self), { id: 41 }),
-    users: async.apply(self.getUsersForGroup.bind(self), { id: 41 })
+    group: async.apply(self.getGroup.bind(self), groupId),
+    buckets: async.apply(self.getBucketsForGroup.bind(self), {id: groupId}),
+    allocations: async.apply(self.getAllocationsForGroup.bind(self), { id: groupId }),
+    users: async.apply(self.getUsersForGroup.bind(self), { id: groupId })
   }, callback);
 }
 
